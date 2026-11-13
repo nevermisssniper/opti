@@ -1,0 +1,20 @@
+[
+  {
+    "id": "opti",
+    "name": "OPTI",
+    "category": "Machine learning",
+    "headline": "Change the inputs. See the model.",
+    "description": "Explore how a fitted model responds to behavioral inputs, with historical context fixed.",
+    "mode": "opti",
+    "maturity": "Existing model",
+    "disclosure": "Model exported from actual Python training on synthetic data.",
+    "features": [
+      "What-if sliders",
+      "Coefficient view",
+      "Held-out metrics"
+    ],
+    "remaining": "These synthetic associations are not personal predictions or causal recommendations.",
+    "number": "03",
+    "repo": "https://github.com/nevermisssniper/opti"
+  }
+]

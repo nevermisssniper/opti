@@ -3,7 +3,7 @@
 A linear regression system that models cross-domain (mental / physical / cognitive) performance interactions, then surfaces the **minimum behavioral changes** required to hit a target performance floor via constrained gradient optimization.
 
 ```
-behavior log ──▶ features (interactions + lags) ──▶ multi-output Ridge ──▶ constrained QP ──▶ recommendation
+behavior log ──▶ features (interactions + lags) ──▶ multi-output Ridge ──▶ constrained nonlinear optimization ──▶ recommendation
 ```
 
 ## What's in the box
@@ -13,7 +13,7 @@ behavior log ──▶ features (interactions + lags) ──▶ multi-output Rid
 | Synthetic data | `opti/data.py` | Daily logs with **known ground-truth weights** (the recovery test relies on this) |
 | Features | `opti/features.py` | z-score → hand-picked interactions → t-1/t-2/t-3 lags |
 | Model | `opti/model.py` | Multi-output Ridge with time-series-CV alpha selection; numpy closed-form parity check |
-| Optimizer | `opti/optimizer.py` | SLSQP-solved constrained QP: minimize ‖Δx‖² s.t. predicted score ≥ target |
+| Optimizer | `opti/optimizer.py` | SLSQP-solved constrained nonlinear optimization: minimize ‖Δx‖² s.t. predicted score ≥ target |
 | CLI | `opti/cli.py` | `opti demo` runs the full pipeline end-to-end |
 | Tests | `tests/` | 22 tests including coefficient-recovery on synthetic ground truth |
 
@@ -67,7 +67,7 @@ Two reasons. First, the maximize-score formulation is degenerate: push every kno
 ### Why fixed-feature support in the optimizer?
 At the time you ask for a recommendation today, some inputs are already determined: yesterday's training load, today's accumulated screen time, etc. The optimizer takes a `fixed` list and pins those deltas to zero so it can't recommend the impossible.
 
-## The QP
+## The optimization problem
 
 For a fitted linear model with weights `W ∈ ℝ^{T×F}` and intercept `b ∈ ℝ^T`:
 
@@ -78,7 +78,7 @@ subject to       (W φ(z₀ + Δz))_j + b_j  ≥  target_j         ∀ j ∈ con
                  (Δz)_j = 0                                  ∀ j ∈ fixed
 ```
 
-where `φ` re-derives interactions from the perturbed main effects so that `sleep × HRV` updates consistently with `sleep` and `HRV`. Lagged features are constants — yesterday is yesterday. The problem is a convex QP (positive-definite quadratic objective, linear constraints) and SLSQP finds the global optimum.
+where `φ` re-derives interactions from the perturbed main effects so that `sleep × HRV` updates consistently with `sleep` and `HRV`. Lagged features are constants — yesterday is yesterday. The objective is quadratic, but recomputed interaction terms make the constraints nonlinear and potentially nonconvex. SLSQP returns a local solution; it does not guarantee a global minimum.
 
 ## Coefficient recovery (the headline test)
 
@@ -113,3 +113,9 @@ opti/
 ├── pyproject.toml       # package + ruff + mypy + pytest config
 └── Makefile             # make test / make lint / make demo
 ```
+
+
+
+## Interactive workbench (2026-11-13)
+
+Run `python serve_demo.py`, then open <http://127.0.0.1:8000>. See [QUICKSTART.md](QUICKSTART.md) for core commands, tests, provenance and remaining requirements.

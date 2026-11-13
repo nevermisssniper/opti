@@ -7,9 +7,9 @@ Given a fitted linear model and today's behavior x_0, find Delta x such that:
                 lb <= x_0 + Delta x <= ub                    (physiological bounds)
                 Delta x[fixed] = 0                           (immutable features)
 
-This is a convex quadratic program (QP):
+This is a constrained nonlinear optimization problem:
   - Objective is positive-definite quadratic in Delta x.
-  - All constraints are linear.
+  - Interaction features make the performance constraints nonlinear.
 
 We solve it with scipy's SLSQP. For a problem this small (~8-12 mutable
 behavioral inputs) SLSQP is overkill but reliable; we'd swap to cvxpy or a
@@ -57,7 +57,7 @@ class OptimizationResult:
 
 
 class BehaviorOptimizer:
-    """Solve the constrained QP that surfaces minimum behavioral changes.
+    """Solve the constrained nonlinear optimization that surfaces minimum behavioral changes.
 
     Parameters
     ----------
@@ -245,3 +245,4 @@ class BehaviorOptimizer:
             },
             effort_norm=float(np.sqrt(np.dot(delta_z_opt, delta_z_opt))),
         )
+

@@ -56,7 +56,7 @@ def run_demo(
     scores = model.score(X, y)
 
     # Use the most recent row as "today's behavior" and the prior days as history.
-    history = df.iloc[-max(fb.lags):][fb.behavior_cols] if fb.lags else None
+    history = df.iloc[:-1].tail(max(fb.lags))[fb.behavior_cols] if fb.lags else None
     today = df.iloc[-1][fb.behavior_cols].to_dict()
 
     opt = BehaviorOptimizer(model=model, features=fb, bounds=cfg.bounds)
@@ -116,3 +116,4 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
